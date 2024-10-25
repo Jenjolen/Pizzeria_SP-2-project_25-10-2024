@@ -2,9 +2,7 @@ package dat.daos.impl;
 
 import dat.config.Populate;
 import dat.daos.IDAO;
-import dat.dtos.HotelDTO;
 import dat.dtos.PizzaDTO;
-import dat.entities.Hotel;
 import dat.entities.Pizza;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -75,15 +73,18 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
     }
 
     @Override
-    public void delete(Integer integer) {
+    public PizzaDTO delete(Integer integer) {
+        PizzaDTO deletedPizzaDTO = null;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Pizza pizza = em.find(Pizza.class, integer);
             if (pizza != null) {
+                deletedPizzaDTO = new PizzaDTO(pizza);
                 em.remove(pizza);
             }
             em.getTransaction().commit();
         }
+        return deletedPizzaDTO;
     }
 
     @Override

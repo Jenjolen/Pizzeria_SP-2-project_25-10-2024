@@ -8,7 +8,10 @@ public interface IDAO<T, I> {
     List<T> readAll();
     T create(T t);
     T update(I i, T t);
-    void delete(I i);
+    T delete(I i);
+
+    //void delete(Integer integer);
+
     boolean validatePrimaryKey(I i);
 
 }

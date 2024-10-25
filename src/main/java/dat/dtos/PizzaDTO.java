@@ -1,16 +1,19 @@
 package dat.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dat.entities.Pizza;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
 @Setter
+@JsonIgnoreProperties
 
 public class PizzaDTO{
     private Integer id;
@@ -46,20 +49,14 @@ public class PizzaDTO{
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PizzaDTO pizzaDto)) return false;
-
-        return getId().equals(pizzaDto.getId());
+        if (!(o instanceof PizzaDTO pizzaDTO)) return false;
+        return Objects.equals(name, pizzaDTO.name) && Objects.equals(description, pizzaDTO.description) && Objects.equals(topping, pizzaDTO.topping) && Objects.equals(price, pizzaDTO.price) && pizzaType == pizzaDTO.pizzaType;
     }
 
     @Override
-    public int hashCode()
-    {
-        return getId().hashCode();
+    public int hashCode() {
+        return Objects.hash(name, description, topping, price, pizzaType);
     }
-
-
-
 }

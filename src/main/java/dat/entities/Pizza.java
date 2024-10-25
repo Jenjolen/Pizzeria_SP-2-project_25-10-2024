@@ -1,5 +1,6 @@
 package dat.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dat.dtos.PizzaDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Setter
+@JsonIgnoreProperties
 @Table(name = "pizza")
 public class Pizza {
 

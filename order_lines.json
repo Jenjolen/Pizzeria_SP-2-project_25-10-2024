@@ -1,0 +1,21 @@
+[ {
+  "id" : null,
+  "order" : {
+    "id" : null,
+    "orderDate" : null,
+    "orderPrice" : null,
+    "user" : null,
+    "orderLines" : [ ]
+  },
+  "pizza" : {
+    "id" : null,
+    "name" : null,
+    "description" : null,
+    "toppings" : null,
+    "price" : null,
+    "orderLines" : [ ],
+    "pizzaType" : null
+  },
+  "quantity" : 2,
+  "price" : 20.0
+} ]
