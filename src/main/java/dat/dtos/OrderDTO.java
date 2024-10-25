@@ -1,5 +1,6 @@
 package dat.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dat.entities.Order;
 import dk.bugelhartmann.UserDTO;
 import lombok.Getter;
@@ -7,12 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
 @Setter
+@JsonIgnoreProperties
 public class OrderDTO {
     private Integer id;
     private String orderDate;
@@ -47,4 +50,15 @@ public class OrderDTO {
         this.orderLines = orderLines;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OrderDTO orderDTO)) return false;
+        return Objects.equals(getOrderDate(), orderDTO.getOrderDate()) && Objects.equals(getOrderPrice(), orderDTO.getOrderPrice()) && Objects.equals(getOrderLines(), orderDTO.getOrderLines()) && Objects.equals(getUser(), orderDTO.getUser());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getOrderDate(), getOrderPrice(), getOrderLines(), getUser());
+    }
 }

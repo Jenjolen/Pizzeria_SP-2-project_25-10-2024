@@ -14,9 +14,9 @@ public class PizzaRoute {
 
         return () -> {
             //  get("/populate", pizzaController::populate);
-            post("/", pizzaController::create, Role.USER);
-            post("/multiple", pizzaController::createMultiple, Role.USER);
-            post("/populate", pizzaController::populate, Role.ADMIN);
+            post("/", pizzaController::create);
+            post("/multiple", pizzaController::createMultiple);
+            get("/populate", pizzaController::populate);
             get("/", pizzaController::readAll);
             get("/{id}", pizzaController::read);
             put("/{id}", pizzaController::update);

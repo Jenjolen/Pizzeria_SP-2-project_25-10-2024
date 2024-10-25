@@ -1,6 +1,9 @@
 package dat.controllers.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dat.config.HibernateConfig;
+import dat.config.Populate;
 import dat.controllers.IController;
 import dat.daos.impl.PizzaDAO;
 import dat.dtos.PizzaDTO;
@@ -10,14 +13,17 @@ import jakarta.persistence.EntityManagerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PizzaController implements IController<PizzaDTO, Integer> {
 
     private final PizzaDAO dao;
+    private final Populate populateService;
 
     public PizzaController() {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
         this.dao = PizzaDAO.getInstance(emf);
+        this.populateService = new Populate();
     }
 
     @Override
@@ -53,23 +59,35 @@ public class PizzaController implements IController<PizzaDTO, Integer> {
     }
 
     public void createMultiple(Context ctx) {
-        // request
-            List<PizzaDTO> pizzaDTOS = new ArrayList<>();
-        for (int i = 0; i < ctx.body().length(); i++) {
-            PizzaDTO jsonRequest = ctx.bodyAsClass(PizzaDTO.class);
-            dao.create(jsonRequest);
-            ctx.json(jsonRequest, PizzaDTO.class);
-            pizzaDTOS.add(jsonRequest);
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<PizzaDTO> pizzaDTOS;
+
+        try {
+            // Deserialize the JSON array into a list of PizzaDTO objects
+            pizzaDTOS = objectMapper.readValue(ctx.body(), new TypeReference<List<PizzaDTO>>() {});
+        } catch (Exception e) {
+            ctx.res().setStatus(400);
+            ctx.json(Map.of("error", "Invalid JSON format"));
+            return;
         }
 
-        if (pizzaDTOS.size() == ctx.body().length())
+        // Iterate over the list and create each pizza
+        for (PizzaDTO pizzaDTO : pizzaDTOS) {
+            dao.create(pizzaDTO);
+        }
+
+        // Set the response status to 201 Created
         ctx.res().setStatus(201);
+        ctx.json(pizzaDTOS);
     }
 
     public void populate(Context ctx) {
-        dao.populate();
+        populateService.populate();
+        List<PizzaDTO> pizzaDTOS = dao.readAll();
         ctx.res().setStatus(200);
+        ctx.json(pizzaDTOS);
         ctx.json("{\"message\": \"Database has been populated\"}");
+
     }
 
     @Override

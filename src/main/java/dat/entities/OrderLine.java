@@ -1,7 +1,10 @@
 package dat.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dat.dtos.OrderLineDTO;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +15,9 @@ import java.util.Objects;
 @NoArgsConstructor
 @Entity
 @Setter
-@Table(name = "order_list")
+@EqualsAndHashCode(exclude = {"order", "pizza"})
+@JsonIgnoreProperties
+@Table(name = "orderline")
 public class OrderLine {
 
     @Id
@@ -22,6 +27,7 @@ public class OrderLine {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonBackReference
     private Order order;
 
     @ManyToOne
@@ -51,17 +57,20 @@ public class OrderLine {
         this.price = orderLineDTO.getPrice();
     }
 
-    // Equals and hashCode methods
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderLine orderLine = (OrderLine) o;
-        return Objects.equals(order, orderLine.order) && Objects.equals(pizza, orderLine.pizza);
+        if (!(o instanceof OrderLine)) return false;
+        OrderLine that = (OrderLine) o;
+        return Objects.equals(pizza, that.pizza) &&
+                Objects.equals(quantity, that.quantity) &&
+                Objects.equals(price, that.price);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(order, pizza);
+        return Objects.hash(pizza, quantity, price);
     }
+
+
 }

@@ -2,9 +2,7 @@ package dat.daos.impl;
 
 import dat.config.Populate;
 import dat.daos.IDAO;
-import dat.dtos.HotelDTO;
 import dat.dtos.PizzaDTO;
-import dat.entities.Hotel;
 import dat.entities.Pizza;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -53,10 +51,15 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
         }
     }
 
-    public void populate () {
-        Populate populator= new Populate();
-        populator.populate();
-    }
+//    public List<PizzaDTO> populate () {
+//        try (EntityManager em = emf.createEntityManager()) {
+//            Populate populator = new Populate();
+//            populator.populate();
+//
+//
+//        }
+//
+//    }
 
     @Override
     public PizzaDTO update(Integer integer, PizzaDTO pizzaDTO) {
@@ -65,7 +68,7 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
             Pizza p = em.find(Pizza.class, integer);
             p.setName(pizzaDTO.getName());
             p.setDescription(pizzaDTO.getDescription());
-            p.setToppings(pizzaDTO.getTopping());
+            p.setToppings(pizzaDTO.getToppings());
             p.setPrice(pizzaDTO.getPrice());
             p.setPizzaType(pizzaDTO.getPizzaType());
             Pizza mergedPizza = em.merge(p);

@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OrderLineDAO {
@@ -28,19 +29,42 @@ public class OrderLineDAO {
         return instance;
     }
 
-    public OrderLineDTO create (OrderLineDTO orderLineDTO) {
+    public OrderLineDTO create(OrderLineDTO orderLineDTO) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
+
+        // Create a new OrderLine entity from the DTO
         OrderLine orderLine = new OrderLine(orderLineDTO);
+
+        // Find the existing Order and Pizza entities
         Order order = em.find(Order.class, orderLineDTO.getOrder().getId());
         Pizza pizza = em.find(Pizza.class, orderLineDTO.getPizza().getId());
+
+        // Check if the Order and Pizza entities exist
+        if (order == null || pizza == null) {
+            em.getTransaction().rollback();
+            em.close();
+            throw new IllegalArgumentException("Order or Pizza not found");
+        }
+
+        // Set the Order and Pizza for the OrderLine
         orderLine.setOrder(order);
         orderLine.setPizza(pizza);
-        order.getOrderLines().add(orderLine);
+
+        // Add the new OrderLine to the Order's set of OrderLines
+        Set<OrderLine> orderLines = order.getOrderLines();
+        orderLines.add(orderLine);
+        order.setOrderLines(orderLines);
+
+        // Persist the new OrderLine and merge the updated Order
         em.persist(orderLine);
         em.merge(order);
+
+        // Commit the transaction and close the EntityManager
         em.getTransaction().commit();
         em.close();
+
+        // Return the created OrderLine as a DTO
         return new OrderLineDTO(orderLine);
     }
 
