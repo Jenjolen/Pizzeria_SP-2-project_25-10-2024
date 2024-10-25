@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Entity
 @Setter
-@Table(name = "order")
+@Table(name = "orders")
 public class Order {
 
     @Id
