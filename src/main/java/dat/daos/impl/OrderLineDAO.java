@@ -86,6 +86,7 @@ public class OrderLineDAO {
     public List<OrderLineDTO> readAllOrderLinesByOrder(Integer orderId) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<OrderLine> query = em.createQuery("SELECT o FROM OrderLine o WHERE o.order.id = :orderId", OrderLine.class);
+        query.setParameter("orderId", orderId);
         List<OrderLine> orderLines = query.getResultList();
         em.close();
         return orderLines.stream().map(OrderLineDTO::new).collect(Collectors.toList());
@@ -112,7 +113,13 @@ public class OrderLineDAO {
         OrderLine orderLine = em.find(OrderLine.class, id);
         if (orderLine != null) {
             em.remove(orderLine); // Slet orderLine
-            em.remove(orderLine.getOrder().getOrderLines().remove(orderLine)); // Sletter orderLine fra order
+            for (OrderLine o : orderLine.getOrder().getOrderLines()) {
+                if (o.getId().equals(orderLine.getId())) {
+                    orderLine.getOrder().getOrderLines().remove(o);
+                    break;
+                }
+
+            }
         }
         em.getTransaction().commit();
         em.close();

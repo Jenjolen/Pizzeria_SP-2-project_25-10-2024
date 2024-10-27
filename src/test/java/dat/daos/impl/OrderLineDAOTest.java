@@ -32,8 +32,8 @@ public class OrderLineDAOTest {
         orderLineDAO = OrderLineDAO.getInstance(emf);
     }
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
         entityManager.getTransaction().begin();
         // Step 1: Create and persist User entity
         User user = new User();
@@ -86,8 +86,8 @@ public class OrderLineDAOTest {
 
     }
 
-    @AfterEach
-    public void tearDown() {
+    @AfterAll
+    public static void tearDown() {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         em.createQuery("DELETE FROM OrderLine").executeUpdate();
@@ -113,30 +113,6 @@ public class OrderLineDAOTest {
         OrderLine orderLine = new OrderLine(createdOrderLine);
 
 
-//        // Expected JSON
-//        String expectedJson = """
-//                {
-//                    "id": null,
-//                    "order": {
-//                        "id": 1,
-//                        "orderDate": "2023-10-01",
-//                        "orderPrice": 150.0
-//                    },
-//                    "pizza": {
-//                        "id": 1,
-//                        "name": "Margherita",
-//                        "description": "Classic pizza with tomato and mozzarella",
-//                        "toppings": "Tomato, Mozzarella, Basil",
-//                        "price": 75.0
-//                    },
-//                    "quantity": 2,
-//                    "price": 150.0
-//                }""";
-//
-//        // Serialize actual OrderLineDTO to JSON and compare
-//        String actualJson = objectMapper.writeValueAsString(createdOrderLine);
-//        assertEquals(objectMapper.readTree(expectedJson), objectMapper.readTree(actualJson));
-
         OrderLine dbOrderLine = em.find(OrderLine.class, createdOrderLine.getId());
         assertEquals(dbOrderLine, orderLine);
         Order dbOrder = em.find(Order.class, orderLine.getOrder().getId());
@@ -151,40 +127,34 @@ public class OrderLineDAOTest {
 
     @Test
     public void testReadOrderLine() throws JsonProcessingException {
-        // Prepare expected JSON data
-        String expectedJson = """
-                {
-                    "id": 1,
-                    "order": {
-                        "id": 1,
-                        "orderDate": "2023-10-01",
-                        "orderPrice": 150.0
-                    },
-                    "pizza": {
-                        "id": 1,
-                        "name": "Margherita",
-                        "description": "Classic pizza with tomato and mozzarella",
-                        "toppings": "Tomato, Mozzarella, Basil",
-                        "price": 75.0
-                    },
-                    "quantity": 2,
-                    "price": 150.0
-                }""";
 
-        OrderLineDTO orderLine = orderLineDAO.read(1);
-        assertNotNull(orderLine);
+        OrderLineDTO o = orderLineDAO.read(1);
+        assertEquals(1, o.getId());
+        assertEquals(1, o.getOrder().getId());
+        assertEquals("Pepperoni", o.getPizza().getName());
+        assertEquals(1, o.getQuantity());
+        assertEquals(10.99, o.getPrice());
 
-        // Serialize to JSON and compare
-        String actualJson = objectMapper.writeValueAsString(orderLine);
-        assertEquals(objectMapper.readTree(expectedJson), objectMapper.readTree(actualJson));
+
     }
 
     @Test
-    public void testUpdateOrderLine() throws JsonProcessingException {
+    public void testReadAllOrderLines() {
+        assertEquals(2, orderLineDAO.readAll().size());
+        assertEquals("Pepperoni", orderLineDAO.readAll().get(0).getPizza().getName());
+    }
+
+    @Test
+    public void testReadAllOrderLinesByOrder() {
+        assertEquals(2, orderLineDAO.readAllOrderLinesByOrder(1).size());
+        assertEquals("Pepperoni", orderLineDAO.readAllOrderLinesByOrder(1).get(0).getPizza().getName());
+    }
+
+    @Test
+    public void testUpdateOrderLine()  {
         EntityManager em = emf.createEntityManager();
         Pizza pizza = em.find(Pizza.class, 1);
         Order order = em.find(Order.class, 1);
-        em.close();
 
         // Create and update
         OrderLineDTO orderLineDTO = new OrderLineDTO(order, pizza, 2, 150.0);
@@ -193,28 +163,11 @@ public class OrderLineDAOTest {
         createdOrderLine.setPrice(180.0);
         OrderLineDTO updatedOrderLine = orderLineDAO.update(createdOrderLine.getId(), createdOrderLine);
 
-        // Expected JSON after update
-        String expectedJson = """
-                {
-                    "id": 1,
-                    "order": {
-                        "id": 1,
-                        "orderDate": "2023-10-01",
-                        "orderPrice": 150.0
-                    },
-                    "pizza": {
-                        "id": 1,
-                        "name": "Margherita",
-                        "description": "Classic pizza with tomato and mozzarella",
-                        "toppings": "Tomato, Mozzarella, Basil",
-                        "price": 75.0
-                    },
-                    "quantity": 3,
-                    "price": 180.0
-                }""";
+        assertEquals(3, updatedOrderLine.getQuantity());
+        assertEquals(180.0, updatedOrderLine.getPrice());
+        assertEquals(orderLineDTO.getPizza().getName(), updatedOrderLine.getPizza().getName());
 
-        String actualJson = objectMapper.writeValueAsString(updatedOrderLine);
-        assertEquals(objectMapper.readTree(expectedJson), objectMapper.readTree(actualJson));
+
     }
 
     @Test

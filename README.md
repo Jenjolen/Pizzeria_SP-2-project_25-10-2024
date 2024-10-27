@@ -1,6 +1,6 @@
 # **PIZZERIA REST API Documentation**
 
-
+Linket til vores API: https://pizza.jenjoelle.dk/api/routes
 
 Formålet med vores API endpoints er at skabe en lille illusion om et website med en webshop, der skal fungere som en pizza butik. Vi vil derfor gerne kunne indlæse en pizza liste med alle pizzaer. og foretage crud operationer for rollerne:
 
