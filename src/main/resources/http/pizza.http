@@ -1,0 +1,237 @@
+#### A simple get request to the test endpoint. No need for login
+#GET {{url}}/auth/test/
+#
+#### Create a new user - this one will only get a USER role by default
+#POST {{url}}/auth/register/
+#Content-Type: application/json
+#
+#{
+#  "username": "user",
+#  "password": "test123"
+#}
+#
+####
+#
+#POST {{url}}/auth/login/
+#Content-Type: application/json
+#
+#{
+#  "username": "user",
+#  "password": "test123"
+#}
+#
+#> {%
+#    client.global.set("jwt_token", response.body.token);
+#    console.log("JWT Token:", client.global.get("jwt_token"));
+#%}
+#
+####
+#
+#GET {{url}}/protected/user_demo/
+#Accept: application/json
+#Authorization: Bearer {{jwt_token}}
+#
+####
+#
+#GET {{url}}/protected/admin_demo/
+#Accept: application/json
+#Authorization: Bearer {{jwt_token}}
+#
+#### Add admin role to user
+#
+#POST {{url}}/auth/user/addrole/
+#Accept: application/json
+#Authorization: Bearer {{jwt_token}}
+#Content-Type: application/json
+#
+#{
+#  "role": "superman"
+#}
+
+### Pizza API
+GET {{url}}/pizzas
+Accept: application/json
+
+###
+
+GET {{url}}/pizzas/1
+Accept: application/json
+
+###
+
+POST {{url}}/pizzas
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+  "name": "Hawaii",
+  "toppings": "Pineapple, Ham",
+  "price": 100,
+  "description": "A tropical delight",
+  "pizzaType": "REGULAR"
+}
+
+###
+
+POST {{url}}/pizzas/multiple
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+[
+  {
+    "name": "Pepperoni",
+    "toppings": "Pepperoni",
+    "price": 120,
+    "description": "Classic pepperoni pizza",
+    "pizzaType": "FAMILY"
+  },
+  {
+    "name": "Margherita",
+    "toppings": "Tomato, Mozzarella",
+    "price": 90,
+    "description": "Simple and delicious",
+    "pizzaType": "CHILDSIZE"
+  }
+]
+
+###
+
+GET {{url}}/pizzas/populate
+Authorization: Bearer {{jwt_token}}
+Accept: application/json
+
+###
+
+
+
+###
+
+POST {{url}}/pizzas
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+  "name": "Nicklas Special",
+  "toppings": "Tomato, Mozzarella, Bacon, Pepperoni",
+  "price": 110,
+  "description": "A special mix of flavors",
+    "pizzaType": "PARTY"
+}
+
+> {%
+    client.global.set("pizza_id_3", response.body.id);
+%}
+
+###
+DELETE {{url}}/pizzas/2
+Authorization: Bearer {{jwt_token}}
+Accept: application/json
+
+#### Order Routes
+#
+#POST {{url}}/orders
+#Authorization: Bearer {{jwt_token}}
+#Content-Type: application/json
+#
+#{
+#  "user": "user",
+#  "orderLines": [
+#    {
+#      "pizza": 1,
+#      "quantity": 2,
+#      "price": 100
+#    },
+#    {
+#      "pizza": 2,
+#      "quantity": 1,
+#      "price": 120
+#    }
+#  ],
+#  "orderPrice": 320,
+#  "orderDate": "2021-09-01"
+#}
+#
+#> {%
+#    client.global.set("order_id_1", response.body.id);
+#%}
+#
+####
+#GET {{url}}/orders
+#Authorization: Bearer {{jwt_token}}
+#Accept: application/json
+#
+####
+#GET {{url}}/orders/1
+#Authorization: Bearer {{jwt_token}}
+#Accept: application/json
+#
+####
+#PUT {{url}}/orders/1
+#Authorization: Bearer {{jwt_token}}
+#Content-Type: application/json
+#
+#{
+#  "user": "user",
+#  "orderLines": [
+#    {
+#      "pizza": 3,
+#      "quantity": 3,
+#      "price": 210
+#    },
+#    {
+#      "pizza": 1,
+#      "quantity": 1,
+#      "price": 70
+#    }
+#  ],
+#  "orderPrice": 280,
+#  "orderDate": "2022-09-01"
+#}
+#
+####
+#DELETE {{url}}/orders/2
+#Authorization: Bearer {{jwt_token}}
+#Accept: application/json
+#
+#### OrderLine Routes
+#
+#POST {{url}}/orders/1/orderline
+#Authorization: Bearer {{jwt_token}}
+#Content-Type: application/json
+#
+#{
+#  "pizza": 4,
+#  "quantity": 2,
+#  "price": 100
+#}
+#
+####
+#PUT {{url}}/orders/orderline/1
+#Authorization: Bearer {{jwt_token}}
+#Content-Type: application/json
+#
+#{
+#  "pizza": 5,
+#  "quantity": 3,
+#  "price": 150
+#}
+#
+####
+#DELETE {{url}}/orders/orderline/2
+#Authorization: Bearer {{jwt_token}}
+#Accept: application/json
+#
+####
+#GET {{url}}/orders/orderline/1
+#Authorization: Bearer {{jwt_token}}
+#Accept: application/json
+#
+####
+#GET {{url}}/orders/orderline
+#Authorization: Bearer {{jwt_token}}
+#Accept: application/json
+#
+####
+#GET {{url}}/orders/1/orderline
+#Authorization: Bearer {{jwt_token}}
+#Accept: application/json

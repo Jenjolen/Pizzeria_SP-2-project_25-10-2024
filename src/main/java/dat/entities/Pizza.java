@@ -1,5 +1,6 @@
 package dat.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dat.dtos.PizzaDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Setter
+@JsonIgnoreProperties
 @Table(name = "pizza")
 public class Pizza {
 
@@ -47,18 +49,16 @@ public class Pizza {
     private PizzaType pizzaType;
 
 
-    // Equals and hashCode methods
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Pizza pizza = (Pizza) o;
-        return Objects.equals(name, pizza.name);
+        if (!(o instanceof Pizza pizza)) return false;
+        return Objects.equals(getName(), pizza.getName()) && Objects.equals(getDescription(), pizza.getDescription()) && Objects.equals(getToppings(), pizza.getToppings()) && Objects.equals(getPrice(), pizza.getPrice()) && getPizzaType() == pizza.getPizzaType();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName(), getDescription(), getToppings(), getPrice(), getPizzaType());
     }
 
     public Pizza (PizzaDTO pizzaDTO) {
@@ -66,7 +66,7 @@ public class Pizza {
         this.id = pizzaDTO.getId();
         this.name = pizzaDTO.getName();
         this.description = pizzaDTO.getDescription();
-        this.toppings = pizzaDTO.getTopping();
+        this.toppings = pizzaDTO.getToppings();
         this.price = pizzaDTO.getPrice();
         this.pizzaType = pizzaDTO.getPizzaType();
 
@@ -76,5 +76,7 @@ public class Pizza {
     public enum PizzaType {
         CHILDSIZE, FAMILY, PARTY, REGULAR;
     }
+
+
 
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OrderLineDAO {
@@ -28,19 +29,42 @@ public class OrderLineDAO {
         return instance;
     }
 
-    public OrderLineDTO create (OrderLineDTO orderLineDTO) {
+    public OrderLineDTO create(OrderLineDTO orderLineDTO) {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
+
+        // Create a new OrderLine entity from the DTO
         OrderLine orderLine = new OrderLine(orderLineDTO);
+
+        // Find the existing Order and Pizza entities
         Order order = em.find(Order.class, orderLineDTO.getOrder().getId());
         Pizza pizza = em.find(Pizza.class, orderLineDTO.getPizza().getId());
+
+        // Check if the Order and Pizza entities exist
+        if (order == null || pizza == null) {
+            em.getTransaction().rollback();
+            em.close();
+            throw new IllegalArgumentException("Order or Pizza not found");
+        }
+
+        // Set the Order and Pizza for the OrderLine
         orderLine.setOrder(order);
         orderLine.setPizza(pizza);
-        order.getOrderLines().add(orderLine);
+
+        // Add the new OrderLine to the Order's set of OrderLines
+        Set<OrderLine> orderLines = order.getOrderLines();
+        orderLines.add(orderLine);
+        order.setOrderLines(orderLines);
+
+        // Persist the new OrderLine and merge the updated Order
         em.persist(orderLine);
         em.merge(order);
+
+        // Commit the transaction and close the EntityManager
         em.getTransaction().commit();
         em.close();
+
+        // Return the created OrderLine as a DTO
         return new OrderLineDTO(orderLine);
     }
 
@@ -62,6 +86,7 @@ public class OrderLineDAO {
     public List<OrderLineDTO> readAllOrderLinesByOrder(Integer orderId) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<OrderLine> query = em.createQuery("SELECT o FROM OrderLine o WHERE o.order.id = :orderId", OrderLine.class);
+        query.setParameter("orderId", orderId);
         List<OrderLine> orderLines = query.getResultList();
         em.close();
         return orderLines.stream().map(OrderLineDTO::new).collect(Collectors.toList());
@@ -88,7 +113,13 @@ public class OrderLineDAO {
         OrderLine orderLine = em.find(OrderLine.class, id);
         if (orderLine != null) {
             em.remove(orderLine); // Slet orderLine
-            em.remove(orderLine.getOrder().getOrderLines().remove(orderLine)); // Sletter orderLine fra order
+            for (OrderLine o : orderLine.getOrder().getOrderLines()) {
+                if (o.getId().equals(orderLine.getId())) {
+                    orderLine.getOrder().getOrderLines().remove(o);
+                    break;
+                }
+
+            }
         }
         em.getTransaction().commit();
         em.close();

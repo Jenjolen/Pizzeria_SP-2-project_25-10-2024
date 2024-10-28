@@ -64,6 +64,7 @@ Content-Type: application/json
     "price": 100
 }
 ###
+
 POST {{url}}/pizzas/multiple
 Authorization: Bearer {{jwt_token}}
 Content-Type: application/json

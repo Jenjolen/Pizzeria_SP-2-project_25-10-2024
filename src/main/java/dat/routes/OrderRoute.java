@@ -17,19 +17,19 @@ public class OrderRoute {
         return () -> {
             //  get("/populate", orderController::populate);
             // Order routes
-            post("/", orderController::create, Role.USER);
+            post("/", orderController::create);
             get("/", orderController::readAll);
             get("/{id}", orderController::read);
-            put("/{id}", orderController::update, Role.ADMIN, Role.USER);
-            delete("/{id}", orderController::delete, Role.ADMIN);
+            put("/{id}", orderController::update);
+            delete("/{id}", orderController::delete);
 
             // OrderLine routes
-            post("/{id}/orderline", orderController::addOrderLine, Role.USER); // vi laver en ny orderline på en order med et bestemt orderId
-            put("/orderline/{id}", orderController::updateOrderLine, Role.USER, Role.ADMIN); // orderLineId er hvad Id refererer til
-            delete("/orderline/{id}", orderController::deleteOrderLine, Role.USER, Role.ADMIN); // orderLineId er hvad Id refererer til
-            get("/orderline/{id}", orderController::readOrderLine, Role.USER, Role.ADMIN); // orderLineId er hvad Id refererer til - vi henter en orderline med et bestemt id
-            get("/orderline", orderController::readAllOrderLines, Role.USER, Role.ADMIN); // vi henter alle orderlines uanset order
-            get("/{id}/orderline", orderController::readAllOrderLinesByOrder, Role.USER, Role.ADMIN); // orderId er hvad Id refererer til - vi henter alle orderlines på en order med et bestemt orderId
+            post("/{id}/orderline", orderController::addOrderLine); // vi laver en ny orderline på en order med et bestemt orderId
+            put("/orderline/{id}", orderController::updateOrderLine); // orderLineId er hvad Id refererer til
+            delete("/orderline/{id}", orderController::deleteOrderLine); // orderLineId er hvad Id refererer til
+            get("/orderline/{id}", orderController::readOrderLine); // orderLineId er hvad Id refererer til - vi henter en orderline med et bestemt id
+            get("/orderline", orderController::readAllOrderLines); // vi henter alle orderlines uanset order
+            get("/{id}/orderline", orderController::readAllOrderLinesByOrder); // orderId er hvad Id refererer til - vi henter alle orderlines på en order med et bestemt orderId
 
         };
     }

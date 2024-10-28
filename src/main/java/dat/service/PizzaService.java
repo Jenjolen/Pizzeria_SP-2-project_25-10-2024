@@ -19,7 +19,7 @@ public class PizzaService {
         Pizza pizza = new Pizza();
         pizza.setName(pizzaDTO.getName());
         pizza.setDescription(pizzaDTO.getDescription());
-        pizza.setToppings(pizzaDTO.getTopping());
+        pizza.setToppings(pizzaDTO.getToppings());
         pizza.setPrice(pizzaDTO.getPrice());
         return pizza;
     }
