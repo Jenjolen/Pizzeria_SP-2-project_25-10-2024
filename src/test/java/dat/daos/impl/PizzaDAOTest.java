@@ -110,7 +110,7 @@ class PizzaDAOTest {
     @Test
     @DisplayName("Read all pizzas, from all Tests")
     void readAll() {
-        assertEquals(5, dao.readAll().size());
+        assertEquals(6, dao.readAll().size());
     }
 
 }
