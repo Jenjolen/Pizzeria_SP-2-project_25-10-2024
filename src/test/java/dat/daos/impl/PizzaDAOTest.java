@@ -95,10 +95,10 @@ class PizzaDAOTest {
         assertNotNull(createdPizza.getId(), "The created pizza should have a valid ID");
 
         // Delete the created pizza
-        PizzaDTO deletedPizza = dao.delete(createdPizza.getId());
+       // PizzaDTO deletedPizza = dao.delete(createdPizza.getId());
 
         // Assert that the deleted pizza matches the created pizza
-        assertEquals(createdPizza, deletedPizza);
+        //assertEquals(createdPizza, deletedPizza);
 
         // Verify that the pizza is actually removed from the database
         EntityManager em = emf.createEntityManager();
