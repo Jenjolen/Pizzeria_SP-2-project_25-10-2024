@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class OrderLineDAOTest {
 
     private static EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
-    private static OrderLineDAO orderLineDAO;
+    static OrderLineDAO orderLineDAO;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static EntityManager entityManager = emf.createEntityManager();
 
@@ -32,8 +32,8 @@ public class OrderLineDAOTest {
         orderLineDAO = OrderLineDAO.getInstance(emf);
     }
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         entityManager.getTransaction().begin();
         // Step 1: Create and persist User entity
         User user = new User();
@@ -86,8 +86,8 @@ public class OrderLineDAOTest {
 
     }
 
-    @AfterAll
-    public static void tearDown() {
+    @AfterEach
+    public void tearDown() {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         em.createQuery("DELETE FROM OrderLine").executeUpdate();
@@ -140,13 +140,13 @@ public class OrderLineDAOTest {
 
     @Test
     public void testReadAllOrderLines() {
-        assertEquals(2, orderLineDAO.readAll().size());
+        assertEquals(1, orderLineDAO.readAll().size());
         assertEquals("Pepperoni", orderLineDAO.readAll().get(0).getPizza().getName());
     }
 
     @Test
     public void testReadAllOrderLinesByOrder() {
-        assertEquals(2, orderLineDAO.readAllOrderLinesByOrder(1).size());
+        assertEquals(1, orderLineDAO.readAllOrderLinesByOrder(1).size());
         assertEquals("Pepperoni", orderLineDAO.readAllOrderLinesByOrder(1).get(0).getPizza().getName());
     }
 
