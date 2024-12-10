@@ -1,11 +1,11 @@
 package dat.daos.impl;
 
-import dat.config.Populate;
 import dat.daos.IDAO;
 import dat.dtos.PizzaDTO;
 import dat.entities.Pizza;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.TypedQuery;
 import lombok.NoArgsConstructor;
 
@@ -28,6 +28,9 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
     public PizzaDTO read(Integer integer) {
         try (EntityManager em = emf.createEntityManager()) {
             Pizza pizza = em.find(Pizza.class, integer);
+            if (pizza == null) {
+                throw new EntityNotFoundException("Pizza with id " + integer + " not found");
+            }
             return new PizzaDTO(pizza);
         }
     }
@@ -51,21 +54,14 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
         }
     }
 
-//    public List<PizzaDTO> populate () {
-//        try (EntityManager em = emf.createEntityManager()) {
-//            Populate populator = new Populate();
-//            populator.populate();
-//
-//
-//        }
-//
-//    }
-
     @Override
     public PizzaDTO update(Integer integer, PizzaDTO pizzaDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Pizza p = em.find(Pizza.class, integer);
+            if (p == null) {
+                throw new EntityNotFoundException("Pizza with id " + integer + " not found");
+            }
             p.setName(pizzaDTO.getName());
             p.setDescription(pizzaDTO.getDescription());
             p.setToppings(pizzaDTO.getToppings());
@@ -73,7 +69,7 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
             p.setPizzaType(pizzaDTO.getPizzaType());
             Pizza mergedPizza = em.merge(p);
             em.getTransaction().commit();
-            return mergedPizza != null ? new PizzaDTO(mergedPizza) : null;
+            return new PizzaDTO(mergedPizza);
         }
     }
 

@@ -36,8 +36,6 @@ public class ApplicationConfig {
 
         app.beforeMatched(accessController::accessHandler);
 
-        app.beforeMatched(ctx -> accessController.accessHandler(ctx));
-
         app.exception(Exception.class, ApplicationConfig::generalExceptionHandler);
         app.exception(ApiException.class, ApplicationConfig::apiExceptionHandler);
         app.start(port);
