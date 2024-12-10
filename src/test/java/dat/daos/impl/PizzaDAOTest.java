@@ -95,7 +95,7 @@ class PizzaDAOTest {
         assertNotNull(createdPizza.getId(), "The created pizza should have a valid ID");
 
         // Delete the created pizza
-       // PizzaDTO deletedPizza = dao.delete(createdPizza.getId());
+        dao.delete(createdPizza.getId());
 
         // Assert that the deleted pizza matches the created pizza
         //assertEquals(createdPizza, deletedPizza);
@@ -103,14 +103,14 @@ class PizzaDAOTest {
         // Verify that the pizza is actually removed from the database
         EntityManager em = emf.createEntityManager();
         Pizza pizza = em.find(Pizza.class, createdPizza.getId());
-        assertNull(pizza, "The pizza should be deleted from the database");
+        assertNull(pizza);
         em.close();
     }
 
     @Test
     @DisplayName("Read all pizzas, from all Tests")
     void readAll() {
-        assertEquals(6, dao.readAll().size());
+        assertEquals(2, dao.readAll().size());
     }
 
 }

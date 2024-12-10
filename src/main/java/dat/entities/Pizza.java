@@ -72,6 +72,14 @@ public class Pizza {
 
     }
 
+    public Pizza(String name, String description, String toppings, Double price, PizzaType pizzaType) {
+        this.name = name;
+        this.description = description;
+        this.toppings = toppings;
+        this.price = price;
+        this.pizzaType = pizzaType;
+    }
+
 
     public enum PizzaType {
         CHILDSIZE, FAMILY, PARTY, REGULAR;
