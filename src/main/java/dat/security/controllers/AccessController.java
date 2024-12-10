@@ -12,8 +12,8 @@ import java.util.Set;
  * Purpose: To handle security in the API at the route level
  *  Author: Jon Bertelsen
  */
-
 public class AccessController implements IAccessController {
+
 
     SecurityController securityController = SecurityController.getInstance();
 

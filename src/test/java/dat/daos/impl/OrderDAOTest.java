@@ -9,7 +9,8 @@ import dat.entities.Order;
 import dat.entities.Pizza;
 import dat.security.entities.Role;
 import dat.security.entities.User;
-import dat.security.entities.UserDTO;
+//import dat.security.entities.UserDTO;
+import dk.bugelhartmann.UserDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -47,6 +48,7 @@ class OrderDAOTest {
 
     @Test
     void create() {
+        entityManager.getTransaction().begin();
         User user = new User();
         user.setUsername("testUser");
         user.setGender("Undefined");
@@ -54,8 +56,10 @@ class OrderDAOTest {
         user.setPassword("password123");
         user.setAge(25);
         user.setRoles(Set.of(new Role("USER")));
+        entityManager.persist(user);
+        
         OrderDTO orderDTO = new OrderDTO();
-        orderDTO.setUser(new UserDTO(user));
+        orderDTO.setUser(user.toUserDTO(user));
         orderDTO.setOrderPrice(10.99);
         orderDTO.setOrderDate("2021-12-12");
         orderDTO.setOrderLines(Set.of(new OrderLineDTO(new Order(orderDTO), new Pizza("Olive", "Lots of green yummy olives", "Tomato, green olives, parmesan cheese", 3.49, Pizza.PizzaType.REGULAR), 1, 10.99)));

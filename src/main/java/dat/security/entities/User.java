@@ -1,5 +1,6 @@
 package dat.security.entities;
 
+//import dat.security.entities.UserDTO;
 import dk.bugelhartmann.UserDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,15 +37,15 @@ public class User implements Serializable, ISecurityUser {
     @Column(name = "password")
     private String password;
 
-    @Basic(optional = false)
+    @Basic(optional = true)
     @Column(name = "age")
     private Integer age; // Nytt felt til alder
 
-    @Basic(optional = false)
+    @Basic(optional = true)
     @Column(name = "gender")
     private String gender; // Nytt felt til køn
 
-    @Basic(optional = false)
+    @Basic(optional = true)
     @Column(name = "email", unique = true)
     private String email; // Nytt felt til e-mail
 
@@ -80,6 +81,10 @@ public class User implements Serializable, ISecurityUser {
     public User(UserDTO userDTO) {
         this.username = userDTO.getUsername();
         this.password = BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt());
+    }
+
+    public UserDTO toUserDTO(User user) {
+        return new UserDTO(this.username, this.password, this.getRolesAsStrings());
     }
 
     public void addRole(Role role) {
