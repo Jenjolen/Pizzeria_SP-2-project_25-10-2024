@@ -29,66 +29,120 @@ public class OrderDAO {
 
     public OrderDTO create(OrderDTO orderDTO) {
         EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        Order order = new Order(orderDTO);
-        User user = em.find(User.class, orderDTO.getUser().getUsername());
-        order.setUser(user);
-        em.persist(order);
-        em.getTransaction().commit();
-        em.close();
-        return new OrderDTO(order);
+        try {
+            em.getTransaction().begin();
+
+            Order order = new Order(orderDTO);
+            User user = em.find(User.class, orderDTO.getUser().getUsername());
+            if (user == null) {
+                throw new IllegalArgumentException("User not found");
+            }
+            order.setUser(user);
+
+            // Handle OrderLines
+            if (orderDTO.getOrderLines() != null) {
+                order.getOrderLines().clear();
+                for (OrderLineDTO lineDTO : orderDTO.getOrderLines()) {
+                    OrderLine orderLine = new OrderLine(lineDTO);
+                    orderLine.setOrder(order);
+                    order.getOrderLines().add(orderLine);
+                }
+            }
+
+            em.persist(order);
+            em.getTransaction().commit();
+            return new OrderDTO(order);
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     public OrderDTO read(int id) {
         EntityManager em = emf.createEntityManager();
-        Order order = em.find(Order.class, id);
-        em.close();
-        return order != null ? new OrderDTO(order) : null; // Returner OrderDTO
+        try {
+            Order order = em.find(Order.class, id);
+            return order != null ? new OrderDTO(order) : null;
+        } finally {
+            em.close();
+        }
     }
 
     public List<OrderDTO> readAll() {
         EntityManager em = emf.createEntityManager();
-        TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o", Order.class);
-        List<Order> orders = query.getResultList();
-        em.close();
-        return orders.stream().map(OrderDTO::new).collect(Collectors.toList()); // Konverter til OrderDTO
+        try {
+            TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o", Order.class);
+            List<Order> orders = query.getResultList();
+            return orders.stream().map(OrderDTO::new).collect(Collectors.toList());
+        } finally {
+            em.close();
+        }
     }
 
     public OrderDTO update(Integer id, OrderDTO orderDTO) {
         EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        Order order = em.find(Order.class, id);
-        if (order != null) {
+        try {
+            em.getTransaction().begin();
+            Order order = em.find(Order.class, id);
+            if (order == null) {
+                throw new IllegalArgumentException("Order not found");
+            }
+
             order.setOrderDate(orderDTO.getOrderDate());
             order.setOrderPrice(orderDTO.getOrderPrice());
+
+            // Update OrderLines
             order.getOrderLines().clear();
-            for (OrderLineDTO orderLineDTO : orderDTO.getOrderLines()) {
-                order.getOrderLines().add(new OrderLine(orderLineDTO));
+            if (orderDTO.getOrderLines() != null) {
+                for (OrderLineDTO lineDTO : orderDTO.getOrderLines()) {
+                    OrderLine orderLine = new OrderLine(lineDTO);
+                    orderLine.setOrder(order);
+                    order.getOrderLines().add(orderLine);
+                }
             }
-            User user = em.find(User.class, orderDTO.getUser().getUsername());
-            order.setUser(user);
-            em.merge(order);
+
+            order = em.merge(order);
+            em.getTransaction().commit();
+            return new OrderDTO(order);
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
-        em.getTransaction().commit();
-        em.close();
-        return new OrderDTO(order);}
+    }
 
     public void delete(int id) {
         EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        Order order = em.find(Order.class, id);
-        if (order != null) {
-            em.remove(order); // Slet order
+        try {
+            em.getTransaction().begin();
+            Order order = em.find(Order.class, id);
+            if (order != null) {
+                em.remove(order);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
-        em.getTransaction().commit();
-        em.close();
     }
 
     public boolean validatePrimaryKey(Integer id) {
         EntityManager em = emf.createEntityManager();
-        Order order = em.find(Order.class, id);
-        em.close();
-        return order != null; // Returner true, hvis order findes
+        try {
+            return em.find(Order.class, id) != null;
+        } finally {
+            em.close();
+        }
     }
-
 }

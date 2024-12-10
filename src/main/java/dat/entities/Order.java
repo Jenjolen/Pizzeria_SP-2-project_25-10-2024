@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties
 @Table(name = "orders")
 public class Order {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id", nullable = false, unique = true)
@@ -42,9 +42,27 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<OrderLine> orderLines = new HashSet<>();
+
+    // Helper methods for managing bidirectional relationship
+    public void addOrderLine(OrderLine orderLine) {
+        orderLines.add(orderLine);
+        orderLine.setOrder(this);
+    }
+
+    public void removeOrderLine(OrderLine orderLine) {
+        orderLines.remove(orderLine);
+        orderLine.setOrder(null);
+    }
+
+    public void setOrderLines(Set<OrderLine> orderLines) {
+        this.orderLines.clear();
+        if (orderLines != null) {
+            orderLines.forEach(this::addOrderLine);
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -61,15 +79,24 @@ public class Order {
         return Objects.hash(orderDate, orderPrice, user);
     }
 
-
-
-    public Order (OrderDTO orderDTO) {
+    public Order(OrderDTO orderDTO) {
         this.id = orderDTO.getId();
         this.orderDate = orderDTO.getOrderDate();
         this.orderPrice = orderDTO.getOrderPrice();
-        UserDTO userDTO = orderDTO.getUser();
-        this.user = new User(userDTO.getUsername(), userDTO.getRoles().stream().map(r -> new dat.security.entities.Role(r)).collect(Collectors.toSet()));
-        this.orderLines = orderDTO.getOrderLines().stream().map(orderLineDTO -> new OrderLine(orderLineDTO)).collect(Collectors.toSet());
-    }
 
+        if (orderDTO.getUser() != null) {
+            UserDTO userDTO = orderDTO.getUser();
+            this.user = new User(userDTO.getUsername(),
+                    userDTO.getRoles().stream()
+                            .map(r -> new dat.security.entities.Role(r))
+                            .collect(Collectors.toSet()));
+        }
+
+        if (orderDTO.getOrderLines() != null) {
+            orderDTO.getOrderLines().forEach(orderLineDTO -> {
+                OrderLine orderLine = new OrderLine(orderLineDTO);
+                this.addOrderLine(orderLine);
+            });
+        }
+    }
 }
