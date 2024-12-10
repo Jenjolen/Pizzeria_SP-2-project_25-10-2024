@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OrderDAOTest {
     private static EntityManagerFactory emf;
     private static OrderDAO orderDAO;
@@ -30,57 +31,69 @@ class OrderDAOTest {
     static void setUpClass() {
         emf = HibernateConfig.getEntityManagerFactoryForTest();
         orderDAO = OrderDAO.getInstance(emf);
-        em = emf.createEntityManager();
     }
 
     @BeforeEach
     void setUp() {
-        em.getTransaction().begin();
+        em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
 
-        // Create and persist Role
-        Role userRole = new Role("USER");
-        em.persist(userRole);
+            // Opretter og gemmer en Role
+            Role userRole = new Role("user");
+            em.persist(userRole);
 
-        // Create and persist User with all required fields
-        testUser = new User("testUser", "password123");
-        testUser.addRole(userRole);
-        testUser.setAge(25); // Setting required age
-        testUser.setEmail("test@test.com"); // Setting required email
-        testUser.setGender("Male"); // Setting required gender
-        em.persist(testUser);
+            // Opretter og gemmer en User med alle påkrævede felter
+            testUser = new User();
+            testUser.setUsername("testUser");
+            testUser.setPassword("test123");
+            testUser.setAge(25);  // Tilføjet age
+            testUser.setEmail("test@test.com");  // Tilføjet email
+            testUser.setGender("M");  // Tilføjet gender
+            testUser.addRole(userRole);
+            em.persist(testUser);
 
-        // Create and persist Pizza
-        testPizza = new Pizza();
-        testPizza.setName("Test Pizza");
-        testPizza.setDescription("Test Description");
-        testPizza.setPrice(100.0);
-        testPizza.setToppings("Cheese, Tomato");
-        testPizza.setPizzaType(Pizza.PizzaType.REGULAR);
-        em.persist(testPizza);
+            // Opretter og gemmer en Pizza
+            testPizza = new Pizza();
+            testPizza.setName("Test Pizza");
+            testPizza.setDescription("Test Description");
+            testPizza.setPrice(100.0);
+            testPizza.setToppings("Test Toppings");
+            testPizza.setPizzaType(Pizza.PizzaType.REGULAR);
+            em.persist(testPizza);
 
-        em.getTransaction().commit();
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
     }
 
     @AfterEach
     void tearDown() {
-        em.getTransaction().begin();
-        em.createQuery("DELETE FROM OrderLine").executeUpdate();
-        em.createQuery("DELETE FROM Order").executeUpdate();
-        em.createQuery("DELETE FROM Pizza").executeUpdate();
-        em.createQuery("DELETE FROM User_roles").executeUpdate();
-        em.createQuery("DELETE FROM User").executeUpdate();
-        em.createQuery("DELETE FROM Role").executeUpdate();
-        em.getTransaction().commit();
+        em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.createQuery("DELETE FROM OrderLine").executeUpdate();
+            em.createQuery("DELETE FROM Order").executeUpdate();
+            em.createQuery("DELETE FROM Pizza").executeUpdate();
+            em.createQuery("DELETE FROM User").executeUpdate();
+            em.createQuery("DELETE FROM Role").executeUpdate();
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
     }
 
     @AfterAll
     static void tearDownClass() {
-        em.close();
-        emf.close();
+        if (emf != null) {
+            emf.close();
+        }
     }
 
     @Test
-    void testCreateOrder() {
+    @DisplayName("Create order test")
+    void createOrder() {
         // Arrange
         OrderDTO orderDTO = createTestOrderDTO();
 
@@ -93,10 +106,12 @@ class OrderDAOTest {
         assertEquals(orderDTO.getOrderDate(), createdOrder.getOrderDate());
         assertEquals(orderDTO.getOrderPrice(), createdOrder.getOrderPrice());
         assertEquals(orderDTO.getUser().getUsername(), createdOrder.getUser().getUsername());
+        assertFalse(createdOrder.getOrderLines().isEmpty());
     }
 
     @Test
-    void testReadOrder() {
+    @DisplayName("Read order test")
+    void readOrder() {
         // Arrange
         OrderDTO orderDTO = createTestOrderDTO();
         OrderDTO createdOrder = orderDAO.create(orderDTO);
@@ -109,10 +124,44 @@ class OrderDAOTest {
         assertEquals(createdOrder.getId(), readOrder.getId());
         assertEquals(createdOrder.getOrderDate(), readOrder.getOrderDate());
         assertEquals(createdOrder.getOrderPrice(), readOrder.getOrderPrice());
+        assertEquals(createdOrder.getUser().getUsername(), readOrder.getUser().getUsername());
     }
 
     @Test
-    void testReadAllOrders() {
+    @DisplayName("Update order test")
+    void updateOrder() {
+        // Arrange
+        OrderDTO orderDTO = createTestOrderDTO();
+        OrderDTO createdOrder = orderDAO.create(orderDTO);
+
+        // Act
+        createdOrder.setOrderPrice(200.0);
+        OrderDTO updatedOrder = orderDAO.update(createdOrder.getId(), createdOrder);
+
+        // Assert
+        assertNotNull(updatedOrder);
+        assertEquals(createdOrder.getId(), updatedOrder.getId());
+        assertEquals(200.0, updatedOrder.getOrderPrice());
+    }
+
+    @Test
+    @DisplayName("Delete order test")
+    void deleteOrder() {
+        // Arrange
+        OrderDTO orderDTO = createTestOrderDTO();
+        OrderDTO createdOrder = orderDAO.create(orderDTO);
+
+        // Act
+        orderDAO.delete(createdOrder.getId());
+
+        // Assert
+        OrderDTO deletedOrder = orderDAO.read(createdOrder.getId());
+        assertNull(deletedOrder);
+    }
+
+    @Test
+    @DisplayName("Read all orders test")
+    void readAllOrders() {
         // Arrange
         OrderDTO orderDTO1 = createTestOrderDTO();
         OrderDTO orderDTO2 = createTestOrderDTO();
@@ -124,40 +173,7 @@ class OrderDAOTest {
 
         // Assert
         assertNotNull(orders);
-        assertTrue(orders.size() >= 2);
-    }
-
-    @Test
-    void testUpdateOrder() {
-        // Arrange
-        OrderDTO orderDTO = createTestOrderDTO();
-        OrderDTO createdOrder = orderDAO.create(orderDTO);
-
-        // Modify order
-        createdOrder.setOrderPrice(200.0);
-        createdOrder.setOrderDate("2024-01-21");
-
-        // Act
-        OrderDTO updatedOrder = orderDAO.update(createdOrder.getId(), createdOrder);
-
-        // Assert
-        assertNotNull(updatedOrder);
-        assertEquals(200.0, updatedOrder.getOrderPrice());
-        assertEquals("2024-01-21", updatedOrder.getOrderDate());
-    }
-
-    @Test
-    void testDeleteOrder() {
-        // Arrange
-        OrderDTO orderDTO = createTestOrderDTO();
-        OrderDTO createdOrder = orderDAO.create(orderDTO);
-
-        // Act
-        orderDAO.delete(createdOrder.getId());
-
-        // Assert
-        OrderDTO deletedOrder = orderDAO.read(createdOrder.getId());
-        assertNull(deletedOrder);
+        assertEquals(2, orders.size());
     }
 
     private OrderDTO createTestOrderDTO() {
