@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties
 
 public class PizzaDTO{
-    private Integer id;
+    private Integer pizzaId;
     private String name;
     private String description;
     private String toppings;
@@ -25,7 +25,7 @@ public class PizzaDTO{
 
 
     public PizzaDTO(Pizza pizza){
-        this.id = pizza.getId();
+        this.pizzaId = pizza.getId();
         this.name = pizza.getName();
         this.description = pizza.getDescription();
         this.toppings = pizza.getToppings();

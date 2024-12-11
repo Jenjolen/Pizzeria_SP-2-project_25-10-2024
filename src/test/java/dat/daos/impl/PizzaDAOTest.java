@@ -44,10 +44,10 @@ class PizzaDAOTest {
         PizzaDTO createdPizza = dao.create(pizzaDTO);
 
         // Ensure the createdPizza has a valid ID
-        assertNotNull(createdPizza.getId(), "The created pizza should have a valid ID");
+        assertNotNull(createdPizza.getPizzaId(), "The created pizza should have a valid ID");
 
         // Retrieve the pizza by its ID
-        PizzaDTO foundPizza = dao.read(createdPizza.getId());
+        PizzaDTO foundPizza = dao.read(createdPizza.getPizzaId());
 
         // Assert that the found pizza matches the created pizza
         assertEquals(createdPizza, foundPizza);
@@ -71,11 +71,11 @@ class PizzaDAOTest {
         PizzaDTO createdPizza = dao.create(pizzaDTO);
 
         // Ensure the createdPizza has a valid ID
-        assertNotNull(createdPizza.getId(), "The created pizza should have a valid ID");
+        assertNotNull(createdPizza.getPizzaId(), "The created pizza should have a valid ID");
 
         // ACTUAL -> Update the name of the created pizza
         createdPizza.setName("Pizza 8");
-        PizzaDTO updatedPizza = dao.update(createdPizza.getId(), createdPizza);
+        PizzaDTO updatedPizza = dao.update(createdPizza.getPizzaId(), createdPizza);
 
         // EXPECTED -> PizzaDTO after update
         PizzaDTO expected = new PizzaDTO("Pizza 8", "Description 4", "Cheese", 40.0, Pizza.PizzaType.FAMILY);
@@ -92,7 +92,7 @@ class PizzaDAOTest {
         PizzaDTO createdPizza = dao.create(pizzaDTO);
 
         // Ensure the createdPizza has a valid ID
-        assertNotNull(createdPizza.getId(), "The created pizza should have a valid ID");
+        assertNotNull(createdPizza.getPizzaId(), "The created pizza should have a valid ID");
 
         // Delete the created pizza
        // PizzaDTO deletedPizza = dao.delete(createdPizza.getId());
@@ -102,7 +102,7 @@ class PizzaDAOTest {
 
         // Verify that the pizza is actually removed from the database
         EntityManager em = emf.createEntityManager();
-        Pizza pizza = em.find(Pizza.class, createdPizza.getId());
+        Pizza pizza = em.find(Pizza.class, createdPizza.getPizzaId());
         assertNull(pizza, "The pizza should be deleted from the database");
         em.close();
     }

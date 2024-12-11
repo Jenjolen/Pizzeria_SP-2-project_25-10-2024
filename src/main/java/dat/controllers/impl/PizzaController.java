@@ -8,10 +8,10 @@ import dat.controllers.IController;
 import dat.daos.impl.PizzaDAO;
 import dat.dtos.PizzaDTO;
 import dat.entities.Pizza;
+import dat.exceptions.ApiException;
 import io.javalin.http.Context;
 import jakarta.persistence.EntityManagerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,19 +27,22 @@ public class PizzaController implements IController<PizzaDTO, Integer> {
     }
 
     @Override
-    public void read(Context ctx)  {
+    public void read(Context ctx) throws ApiException {
         // request
-        int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
-        // DTO
-        PizzaDTO pizzaDTO = dao.read(id);
-        // response
-        ctx.res().setStatus(200);
-        ctx.json(pizzaDTO, PizzaDTO.class);
-
+        try {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            // DTO
+            PizzaDTO pizzaDTO = dao.read(id);
+            // response
+            ctx.res().setStatus(200);
+            ctx.json(pizzaDTO, PizzaDTO.class);
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizza not found");
+        }
     }
 
     @Override
-    public void readAll(Context ctx) {
+    public void readAll(Context ctx) throws ApiException {
         // List of DTOS
         List<PizzaDTO> pizzaDTOS = dao.readAll();
         // response
@@ -48,7 +51,7 @@ public class PizzaController implements IController<PizzaDTO, Integer> {
     }
 
     @Override
-    public void create(Context ctx) {
+    public void create(Context ctx) throws ApiException {
         // request
         PizzaDTO jsonRequest = ctx.bodyAsClass(PizzaDTO.class);
         // DTO
@@ -58,7 +61,7 @@ public class PizzaController implements IController<PizzaDTO, Integer> {
         ctx.json(pizzaDTO, PizzaDTO.class);
     }
 
-    public void createMultiple(Context ctx) {
+    public void createMultiple(Context ctx) throws ApiException {
         ObjectMapper objectMapper = new ObjectMapper();
         List<PizzaDTO> pizzaDTOS;
 
@@ -81,7 +84,7 @@ public class PizzaController implements IController<PizzaDTO, Integer> {
         ctx.json(pizzaDTOS);
     }
 
-    public void populate(Context ctx) {
+    public void populate(Context ctx) throws ApiException {
         populateService.populate();
         List<PizzaDTO> pizzaDTOS = dao.readAll();
         ctx.res().setStatus(200);
@@ -91,37 +94,32 @@ public class PizzaController implements IController<PizzaDTO, Integer> {
     }
 
     @Override
-    public void update(Context ctx) {
+    public void update(Context ctx) throws ApiException {
         // request
-        int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
-        // dto
-        PizzaDTO pizzaDTO = dao.update(id, validateEntity(ctx));
-        // response
-        ctx.res().setStatus(200);
-        ctx.json(pizzaDTO, Pizza.class);
+        try {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            PizzaDTO pizzaDTO = ctx.bodyAsClass(PizzaDTO.class);
+            // dto
+            PizzaDTO updatedPizzaDTO = dao.update(id, pizzaDTO);
+            // response
+            ctx.res().setStatus(200);
+            ctx.json(updatedPizzaDTO, Pizza.class);
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizza not updated");
+        }
     }
 
     @Override
-    public void delete(Context ctx) {
+    public void delete(Context ctx) throws ApiException {
         // request
-        int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
-        dao.delete(id);
-        // response
-        ctx.res().setStatus(204);
-    }
-
-    @Override
-    public boolean validatePrimaryKey(Integer integer) {
-        return dao.validatePrimaryKey(integer);
-    }
-
-    @Override
-    public PizzaDTO validateEntity(Context ctx) {
-        return ctx.bodyValidator(PizzaDTO.class)
-                .check( p -> p.getName() != null && !p.getName().isEmpty(), "Pizza name must be set")
-                .check( p -> p.getDescription() != null && !p.getDescription().isEmpty(), "Pizza description must be set")
-                .check( p -> p.getPrice() != null, "Price must be set")
-                .get();
+        try {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            dao.delete(id);
+            // response
+            ctx.res().setStatus(204);
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizza not deleted");
+        }
     }
 }
 

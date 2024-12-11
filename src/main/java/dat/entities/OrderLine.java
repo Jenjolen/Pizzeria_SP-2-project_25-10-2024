@@ -30,8 +30,8 @@ public class OrderLine {
     @JsonBackReference
     private Order order;
 
-    @ManyToOne
     @JoinColumn(name = "pizza_id", nullable = false)
+    @ManyToOne
     private Pizza pizza;
 
     @Setter
@@ -50,7 +50,7 @@ public class OrderLine {
     }
 
     public OrderLine(OrderLineDTO orderLineDTO) {
-        this.id = orderLineDTO.getId();
+        this.id = orderLineDTO.getOrderLineId();
         this.order = orderLineDTO.getOrder();
         this.pizza = orderLineDTO.getPizza();
         this.quantity = orderLineDTO.getQuantity();

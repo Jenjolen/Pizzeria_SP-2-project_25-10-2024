@@ -38,8 +38,8 @@ public class Order {
     @Column(name = "order_price", nullable = false)
     private Double orderPrice;
 
-    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
@@ -64,7 +64,7 @@ public class Order {
 
 
     public Order (OrderDTO orderDTO) {
-        this.id = orderDTO.getId();
+        this.id = orderDTO.getOrderId();
         this.orderDate = orderDTO.getOrderDate();
         this.orderPrice = orderDTO.getOrderPrice();
         UserDTO userDTO = orderDTO.getUser();

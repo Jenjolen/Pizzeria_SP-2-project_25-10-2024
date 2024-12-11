@@ -6,6 +6,7 @@ import dat.daos.impl.OrderDAO;
 import dat.daos.impl.OrderLineDAO;
 import dat.dtos.OrderDTO;
 import dat.dtos.OrderLineDTO;
+import dat.exceptions.ApiException;
 import io.javalin.http.Context;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -22,11 +23,15 @@ public class OrderController implements IController<OrderDTO, Integer> {
     }
 
     @Override
-    public void read(Context ctx) {
-        int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
-        OrderDTO orderDTO = dao.read(id);
-        ctx.res().setStatus(200);
-        ctx.json(orderDTO, OrderDTO.class);
+    public void read(Context ctx) throws ApiException {
+        try {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            OrderDTO orderDTO = dao.read(id);
+            ctx.res().setStatus(200);
+            ctx.json(orderDTO, OrderDTO.class);
+        } catch (Exception e) {
+            throw new ApiException(404, "Order not found");
+        }
     }
 
     @Override
@@ -46,31 +51,41 @@ public class OrderController implements IController<OrderDTO, Integer> {
 
     @Override
     public void update(Context ctx) {
-        int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
-        OrderDTO orderDTO = dao.update(id, validateEntity(ctx));
+        int id = Integer.parseInt(ctx.pathParam("id"));
+        OrderDTO orderDTO = ctx.bodyAsClass(OrderDTO.class);
+        OrderDTO updatedOrderDTO = dao.update(id, orderDTO);
         ctx.res().setStatus(200);
-        ctx.json(orderDTO, OrderDTO.class); // Ændret fra Order.class til OrderDTO.class
+        ctx.json(updatedOrderDTO, OrderDTO.class); // Ændret fra Order.class til OrderDTO.class
     }
 
     @Override
-    public void delete(Context ctx) {
-        int id = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
+    public void delete(Context ctx) throws ApiException {
+        try {
+        int id = Integer.parseInt(ctx.pathParam("id"));
         dao.delete(id);
         ctx.res().setStatus(204);
+        } catch (Exception e) {
+            throw new ApiException(404, "Order not found");
+        }
     }
 
-    public void addOrderLine(Context ctx) {
-        int orderId = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
-        OrderLineDTO orderLineDTO = orderLineDAO.create(ctx.bodyAsClass(OrderLineDTO.class));
-        OrderDTO orderDTO = dao.read(orderId);
-        orderDTO.getOrderLines().add(orderLineDTO);
-        dao.update(orderId, orderDTO);
-        ctx.res().setStatus(201);
-        ctx.json(orderDTO, OrderDTO.class);
+    public void addOrderLine(Context ctx) throws ApiException {
+        try {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            OrderLineDTO orderLineDTO = ctx.bodyAsClass(OrderLineDTO.class);
+            OrderLineDTO addedOrderLineDTO = orderLineDAO.create(orderLineDTO);
+            OrderDTO orderDTO = dao.read(id);
+            orderDTO.getOrderLines().add(orderLineDTO);
+            dao.update(id, orderDTO);
+            ctx.res().setStatus(201);
+            ctx.json(orderDTO, OrderDTO.class);
+        } catch (Exception e) {
+            throw new ApiException(404, "Order for OrderLine not found");
+        }
     }
 
     public void readOrderLine (Context ctx) {
-        int orderLineId = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
+        int orderLineId = Integer.parseInt(ctx.pathParam("id"));
         OrderLineDTO orderLineDTO = orderLineDAO.read(orderLineId);
         ctx.res().setStatus(200);
         ctx.json(orderLineDTO, OrderLineDTO.class);
@@ -83,14 +98,14 @@ public class OrderController implements IController<OrderDTO, Integer> {
     }
 
     public void readAllOrderLinesByOrder (Context ctx) {
-        int orderId = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
+        int orderId = Integer.parseInt(ctx.pathParam("id"));
         List<OrderLineDTO> orderLineDTOS = orderLineDAO.readAllOrderLinesByOrder(orderId);
         ctx.res().setStatus(200);
         ctx.json(orderLineDTOS, OrderLineDTO.class);
     }
 
-    public void updateOrderLine(Context ctx) {
-        int orderLineId = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
+    public void updateOrderLine(Context ctx) throws ApiException {
+        int orderLineId = Integer.parseInt(ctx.pathParam("id"));
         OrderLineDTO orderLineDTO = orderLineDAO.update(orderLineId, ctx.bodyAsClass(OrderLineDTO.class));
         int orderId = orderLineDTO.getOrder().getId();
         OrderDTO orderDTO = dao.read(orderId);
@@ -99,32 +114,14 @@ public class OrderController implements IController<OrderDTO, Integer> {
         ctx.json(orderDTO, OrderDTO.class);
     }
 
-    public void deleteOrderLine(Context ctx) {
-        int orderLineId = ctx.pathParamAsClass("id", Integer.class).check(this::validatePrimaryKey, "Not a valid id").get();
+    public void deleteOrderLine(Context ctx) throws ApiException {
+        int orderLineId = Integer.parseInt(ctx.pathParam("id"));
         OrderLineDTO orderLineDTO = orderLineDAO.read(orderLineId);
         int orderId = orderLineDTO.getOrder().getId();
         OrderDTO orderDTO = dao.read(orderId);
-        orderDTO.getOrderLines().removeIf(o -> orderLineDTO.getId().equals(orderLineId)); // tjekker om orderLineId matcher et id i orderDTO - løber alle Order's orderlines
+        orderDTO.getOrderLines().removeIf(o -> orderLineDTO.getOrderLineId().equals(orderLineId)); // tjekker om orderLineId matcher et id i orderDTO - løber alle Order's orderlines
         dao.update(orderId, orderDTO);
         ctx.res().setStatus(204);
     }
-
-
-
-    @Override
-    public boolean validatePrimaryKey(Integer integer) {
-        return dao.validatePrimaryKey(integer);
-    }
-
-    @Override
-    public OrderDTO validateEntity(Context ctx) {
-        return ctx.bodyValidator(OrderDTO.class)
-                .check(o -> o.getOrderDate() != null && !o.getOrderDate().isEmpty(), "Order date must be set")
-                .check(o -> o.getOrderPrice() != null, "Order price must be set")
-                .get();
-    }
-
-
-
 
 }

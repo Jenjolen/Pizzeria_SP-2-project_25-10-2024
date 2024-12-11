@@ -14,6 +14,7 @@ import dat.security.exceptions.ValidationException;
 import dk.bugelhartmann.ITokenSecurity;
 import dk.bugelhartmann.TokenSecurity;
 import dk.bugelhartmann.UserDTO;
+import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.UnauthorizedResponse;
@@ -59,8 +60,8 @@ public class SecurityController implements ISecurityController {
                 String token = createToken(verifiedUser);
 
                 ctx.status(200).json(returnObject
-                        .put("token", token)
-                        .put("username", verifiedUser.getUsername()));
+                                             .put("token", token)
+                                             .put("username", verifiedUser.getUsername()));
 
             } catch (EntityNotFoundException | ValidationException e) {
                 ctx.status(401);
@@ -80,8 +81,8 @@ public class SecurityController implements ISecurityController {
 
                 String token = createToken(new UserDTO(created.getUsername(), Set.of("USER")));
                 ctx.status(HttpStatus.CREATED).json(returnObject
-                        .put("token", token)
-                        .put("username", created.getUsername()));
+                                                            .put("token", token)
+                                                            .put("username", created.getUsername()));
             } catch (EntityExistsException e) {
                 ctx.status(HttpStatus.UNPROCESSABLE_CONTENT);
                 ctx.json(returnObject.put("msg", "User already exists"));
@@ -127,12 +128,12 @@ public class SecurityController implements ISecurityController {
             throw new UnauthorizedResponse("You need to log in, dude!");
         }
         Set<String> roleNames = allowedRoles.stream()
-                   .map(RouteRole::toString)  // Convert RouteRoles to  Set of Strings
-                   .collect(Collectors.toSet());
+                                            .map(RouteRole::toString)  // Convert RouteRoles to  Set of Strings
+                                            .collect(Collectors.toSet());
         return user.getRoles().stream()
                    .map(String::toUpperCase)
                    .anyMatch(roleNames::contains);
-        }
+    }
 
     @Override
     public String createToken(UserDTO user) {
@@ -169,7 +170,7 @@ public class SecurityController implements ISecurityController {
                 throw new NotAuthorizedException(403, "Token is not valid");
             }
         } catch (ParseException | JOSEException | NotAuthorizedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             throw new ApiException(HttpStatus.UNAUTHORIZED.getCode(), "Unauthorized. Could not verify token");
         }
     }
@@ -186,11 +187,12 @@ public class SecurityController implements ISecurityController {
                 ctx.status(200).json(returnObject.put("msg", "Role " + newRole + " added to user"));
             } catch (EntityNotFoundException e) {
                 ctx.status(404).json("{\"msg\": \"User not found\"}");
-
-
-                
             }
         };
     }
 
+    // Health check for the API. Used in deployment
+    public void healthCheck(@NotNull Context ctx) {
+        ctx.status(200).json("{\"msg\": \"API is up and running\"}");
+    }
 }

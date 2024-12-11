@@ -5,7 +5,7 @@ import dat.routes.Routes;
 import dat.security.controllers.AccessController;
 import dat.security.controllers.SecurityController;
 import dat.security.enums.Role;
-import dat.security.exceptions.ApiException;
+import dat.exceptions.ApiException;
 import dat.security.routes.SecurityRoutes;
 import dat.utils.Utils;
 import io.javalin.Javalin;
@@ -36,7 +36,8 @@ public class ApplicationConfig {
 
         app.beforeMatched(accessController::accessHandler);
 
-        app.beforeMatched(ctx -> accessController.accessHandler(ctx));
+        app.before(ApplicationConfig::corsHeaders);
+        app.options("/*", ApplicationConfig::corsHeadersOptions);
 
         app.exception(Exception.class, ApplicationConfig::generalExceptionHandler);
         app.exception(ApiException.class, ApplicationConfig::apiExceptionHandler);
@@ -54,8 +55,24 @@ public class ApplicationConfig {
     }
 
     public static void apiExceptionHandler(ApiException e, Context ctx) {
-        ctx.status(e.getCode());
-        logger.warn("An API exception occurred: Code: {}, Message: {}", e.getCode(), e.getMessage());
+        ctx.status(e.getStatusCode());
+        logger.warn("An API exception occurred: Code: {}, Message: {}", e.getStatusCode(), e.getMessage());
         ctx.json(Utils.convertToJsonMessage(ctx, "warning", e.getMessage()));
     }
+
+    private static void corsHeaders(Context ctx) {
+        ctx.header("Access-Control-Allow-Origin", "*");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        ctx.header("Access-Control-Allow-Credentials", "true");
+    }
+
+    private static void corsHeadersOptions(Context ctx) {
+        ctx.header("Access-Control-Allow-Origin", "*");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        ctx.header("Access-Control-Allow-Credentials", "true");
+        ctx.status(204);
+    }
+
 }
