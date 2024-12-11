@@ -37,8 +37,8 @@ public class OrderLineDAO {
         OrderLine orderLine = new OrderLine(orderLineDTO);
 
         // Find the existing Order and Pizza entities
-        Order order = em.find(Order.class, orderLineDTO.getOrder().getId());
-        Pizza pizza = em.find(Pizza.class, orderLineDTO.getPizza().getId());
+        Order order = em.find(Order.class, orderLineDTO.getOrder().getOrderId());
+        Pizza pizza = em.find(Pizza.class, orderLineDTO.getPizza().getPizzaId());
 
         // Check if the Order and Pizza entities exist
         if (order == null || pizza == null) {
@@ -97,8 +97,8 @@ public class OrderLineDAO {
         em.getTransaction().begin();
         OrderLine orderLine = em.find(OrderLine.class, id);
         if (orderLine != null) {
-            orderLine.setOrder(orderLineDTO.getOrder());
-            orderLine.setPizza(orderLineDTO.getPizza());
+            orderLine.setOrder(new Order(orderLineDTO.getOrder()));
+            orderLine.setPizza(new Pizza(orderLineDTO.getPizza()));
             orderLine.setQuantity(orderLineDTO.getQuantity());
             orderLine.setPrice(orderLineDTO.getPrice());
             em.merge(orderLine);

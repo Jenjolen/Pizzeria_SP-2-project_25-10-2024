@@ -72,4 +72,10 @@ public class Order {
         this.orderLines = orderDTO.getOrderLines().stream().map(orderLineDTO -> new OrderLine(orderLineDTO)).collect(Collectors.toSet());
     }
 
+    public void addOrderLine(OrderLine orderLine) {
+        orderLine.setOrder(this);
+        this.orderLines.add(orderLine);
+    }
+
+
 }

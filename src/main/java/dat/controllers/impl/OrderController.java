@@ -107,7 +107,7 @@ public class OrderController implements IController<OrderDTO, Integer> {
     public void updateOrderLine(Context ctx) throws ApiException {
         int orderLineId = Integer.parseInt(ctx.pathParam("id"));
         OrderLineDTO orderLineDTO = orderLineDAO.update(orderLineId, ctx.bodyAsClass(OrderLineDTO.class));
-        int orderId = orderLineDTO.getOrder().getId();
+        int orderId = orderLineDTO.getOrder().getOrderId();
         OrderDTO orderDTO = dao.read(orderId);
         dao.update(orderId, orderDTO);
         ctx.res().setStatus(200);
@@ -117,7 +117,7 @@ public class OrderController implements IController<OrderDTO, Integer> {
     public void deleteOrderLine(Context ctx) throws ApiException {
         int orderLineId = Integer.parseInt(ctx.pathParam("id"));
         OrderLineDTO orderLineDTO = orderLineDAO.read(orderLineId);
-        int orderId = orderLineDTO.getOrder().getId();
+        int orderId = orderLineDTO.getOrder().getOrderId();
         OrderDTO orderDTO = dao.read(orderId);
         orderDTO.getOrderLines().removeIf(o -> orderLineDTO.getOrderLineId().equals(orderLineId)); // tjekker om orderLineId matcher et id i orderDTO - løber alle Order's orderlines
         dao.update(orderId, orderDTO);

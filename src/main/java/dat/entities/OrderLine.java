@@ -42,8 +42,7 @@ public class OrderLine {
     @Column(name = "price", nullable = false)
     private Double price;
 
-    public OrderLine(Order order, Pizza pizza, Integer quantity, Double price) {
-        this.order = order;
+    public OrderLine(Pizza pizza, Integer quantity, Double price) {
         this.pizza = pizza;
         this.quantity = quantity;
         this.price = price;
@@ -51,8 +50,7 @@ public class OrderLine {
 
     public OrderLine(OrderLineDTO orderLineDTO) {
         this.id = orderLineDTO.getOrderLineId();
-        this.order = orderLineDTO.getOrder();
-        this.pizza = orderLineDTO.getPizza();
+        this.pizza = new Pizza(orderLineDTO.getPizza());
         this.quantity = orderLineDTO.getQuantity();
         this.price = orderLineDTO.getPrice();
     }

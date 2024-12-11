@@ -38,7 +38,7 @@ public class FileWriterUtilTest { // Kommentar så jeg kan commit :)
         // Opret en Order og Pizza for at kunne bruge dem i OrderLineDTO
         Order order = new Order(); // Opret en dummy Order
         Pizza pizza = new Pizza(); // Opret en dummy Pizza
-        orderLines.add(new OrderLineDTO(order, pizza, 2, 20.0));
+        orderLines.add(new OrderLineDTO(new OrderDTO (order), new PizzaDTO(pizza), 2, 20.0));
 
         fileWriterUtil.saveOrderLines(orderLines);
 

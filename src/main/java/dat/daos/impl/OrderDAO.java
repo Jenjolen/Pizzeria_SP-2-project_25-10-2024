@@ -30,15 +30,36 @@ public class OrderDAO {
 
     public OrderDTO create(OrderDTO orderDTO) {
         EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        Order order = new Order(orderDTO);
-        User user = em.find(User.class, orderDTO.getUser().getUsername());
-        order.setUser(user);
-        em.persist(order);
-        em.getTransaction().commit();
-        em.close();
-        return new OrderDTO(order);
+        try {
+            em.getTransaction().begin();
+
+            Order order = new Order(orderDTO);
+            User user = em.find(User.class, orderDTO.getUser().getUsername());
+            if (user == null) {
+                throw new IllegalArgumentException("User not found for username: " + orderDTO.getUser().getUsername());
+            }
+            order.setUser(user);
+
+            // Maintain bidirectional relationships
+            for (OrderLineDTO orderLineDTO : orderDTO.getOrderLines()) {
+                OrderLine orderLine = new OrderLine(orderLineDTO);
+                orderLine.setOrder(order);
+                order.getOrderLines().add(orderLine); // Add to Order's OrderLines
+            }
+
+            em.persist(order); // Persist the Order; OrderLines are cascaded
+            em.getTransaction().commit();
+            return new OrderDTO(order);
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
     }
+
+
+
 
     public OrderDTO read(int id) throws ApiException {
         try (EntityManager em = emf.createEntityManager()) {

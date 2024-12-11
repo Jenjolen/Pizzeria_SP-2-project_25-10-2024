@@ -3,7 +3,9 @@ package dat.daos.impl;
 import dat.config.HibernateConfig;
 import dat.dtos.OrderDTO;
 import dat.dtos.OrderLineDTO;
+import dat.dtos.PizzaDTO;
 import dat.entities.Order;
+import dat.entities.OrderLine;
 import dat.entities.Pizza;
 import dat.exceptions.ApiException;
 import dat.security.entities.Role;
@@ -27,8 +29,6 @@ class OrderDAOTest {
     private static EntityManager em;
     private static User testUser;
     private static Pizza testPizza;
-    private static Order testOrder;
-    private static OrderLineDTO testOrderLineDTO;
 
     @BeforeAll
     static void setUpClass() {
@@ -65,8 +65,6 @@ class OrderDAOTest {
             testPizza.setPizzaType(Pizza.PizzaType.REGULAR);
             em.persist(testPizza);
 
-
-
             em.getTransaction().commit();
         } finally {
             em.close();
@@ -95,6 +93,22 @@ class OrderDAOTest {
             emf.close();
         }
     }
+
+    @Test
+    void testOrderAndOrderLinePersistence() {
+        OrderDTO orderDTO = createTestOrderDTO();
+        OrderDTO createdOrder = orderDAO.create(orderDTO);
+
+        assertNotNull(createdOrder.getOrderId());
+        assertNotNull(createdOrder.getOrderLines());
+        assertFalse(createdOrder.getOrderLines().isEmpty());
+
+        for (OrderLineDTO orderLine : createdOrder.getOrderLines()) {
+            assertNotNull(orderLine.getOrderLineId());
+            assertEquals(createdOrder.getOrderId(), orderLine.getOrder().getOrderId());
+        }
+    }
+
 
     @Test
     @DisplayName("Create order test")
@@ -155,12 +169,13 @@ class OrderDAOTest {
         // Arrange
         OrderDTO orderDTO = createTestOrderDTO();
         OrderDTO createdOrder = orderDAO.create(orderDTO);
+        OrderDTO foundOrder = orderDAO.read(createdOrder.getOrderId());
 
         // Act
-        orderDAO.delete(createdOrder.getOrderId());
+        orderDAO.delete(foundOrder.getOrderId());
 
         // Assert
-        OrderDTO deletedOrder = orderDAO.read(createdOrder.getOrderId());
+        OrderDTO deletedOrder = orderDAO.read(foundOrder.getOrderId());
         assertNull(deletedOrder);
     }
 
@@ -194,12 +209,14 @@ class OrderDAOTest {
 
         Set<OrderLineDTO> orderLines = new HashSet<>();
         OrderLineDTO orderLineDTO = new OrderLineDTO();
-        orderLineDTO.setPizza(testPizza);
+        orderLineDTO.setPizza(new PizzaDTO(testPizza));
         orderLineDTO.setQuantity(1);
         orderLineDTO.setPrice(100.0);
         orderLines.add(orderLineDTO);
-
         orderDTO.setOrderLines(orderLines);
+        orderLines.forEach(orderLine -> orderLine.setOrder(orderDTO));
+
+
 
         return orderDTO;
     }

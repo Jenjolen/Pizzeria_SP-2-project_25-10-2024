@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dat.config.HibernateConfig;
 import dat.dtos.OrderDTO;
 import dat.dtos.OrderLineDTO;
+import dat.dtos.PizzaDTO;
 import dat.entities.Order;
 import dat.entities.OrderLine;
 import dat.entities.Pizza;
@@ -108,7 +109,7 @@ public class OrderLineDAOTest {
         Pizza pizza = em.find(Pizza.class, 1);
         Order order = em.find(Order.class, 1);
 
-        OrderLineDTO orderLineDTO = new OrderLineDTO(order, pizza, 2, 150.0);
+        OrderLineDTO orderLineDTO = new OrderLineDTO(new OrderDTO(order), new PizzaDTO(pizza), 2, 150.0);
         OrderLineDTO createdOrderLine = orderLineDAO.create(orderLineDTO);
         OrderLine orderLine = new OrderLine(createdOrderLine);
 
@@ -130,7 +131,7 @@ public class OrderLineDAOTest {
 
         OrderLineDTO ol = orderLineDAO.read(1);
         assertEquals(1, ol.getOrderLineId());
-        assertEquals(1, ol.getOrder().getId());
+        assertEquals(1, ol.getOrder().getOrderId());
         assertEquals("Pepperoni", ol.getPizza().getName());
         assertEquals(1, ol.getQuantity());
         assertEquals(10.99, ol.getPrice());
@@ -157,7 +158,7 @@ public class OrderLineDAOTest {
         Order order = em.find(Order.class, 1);
 
         // Create and update
-        OrderLineDTO orderLineDTO = new OrderLineDTO(order, pizza, 2, 150.0);
+        OrderLineDTO orderLineDTO = new OrderLineDTO(new OrderDTO(order), new PizzaDTO (pizza), 2, 150.0);
         OrderLineDTO createdOrderLine = orderLineDAO.create(orderLineDTO);
         createdOrderLine.setQuantity(3);
         createdOrderLine.setPrice(180.0);
