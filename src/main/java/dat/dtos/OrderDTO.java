@@ -17,14 +17,14 @@ import java.util.stream.Collectors;
 @Setter
 @JsonIgnoreProperties
 public class OrderDTO {
-    private Integer id;
+    private Integer orderId;
     private String orderDate;
     private Double orderPrice;
     private Set<OrderLineDTO> orderLines = new HashSet<>();
     private UserDTO user;
 
     public OrderDTO(Order order) {
-        this.id = order.getId();
+        this.orderId = order.getId();
         this.orderDate = order.getOrderDate();
         this.orderPrice = order.getOrderPrice();
         this.user = new UserDTO(order.getUser().getUsername(), order.getUser().getRoles().stream().map(r -> r.getRoleName()).collect(Collectors.toSet()));

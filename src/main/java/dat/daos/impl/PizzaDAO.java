@@ -1,9 +1,9 @@
 package dat.daos.impl;
 
-import dat.config.Populate;
 import dat.daos.IDAO;
 import dat.dtos.PizzaDTO;
 import dat.entities.Pizza;
+import dat.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
@@ -25,29 +25,35 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
     }
 
     @Override
-    public PizzaDTO read(Integer integer) {
+    public PizzaDTO read(Integer integer) throws ApiException {
         try (EntityManager em = emf.createEntityManager()) {
             Pizza pizza = em.find(Pizza.class, integer);
             return new PizzaDTO(pizza);
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizza not found");
         }
     }
 
     @Override
-    public List<PizzaDTO> readAll() {
+    public List<PizzaDTO> readAll() throws ApiException {
         try (EntityManager em = emf.createEntityManager()) {
             TypedQuery<PizzaDTO> query = em.createQuery("SELECT new dat.dtos.PizzaDTO(p) FROM Pizza p", PizzaDTO.class);
             return query.getResultList();
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizzas not found");
         }
     }
 
     @Override
-    public PizzaDTO create(PizzaDTO pizzaDTO) {
+    public PizzaDTO create(PizzaDTO pizzaDTO) throws ApiException {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Pizza pizza = new Pizza(pizzaDTO);
             em.persist(pizza);
             em.getTransaction().commit();
             return new PizzaDTO(pizza);
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizza not created");
         }
     }
 
@@ -62,7 +68,7 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
 //    }
 
     @Override
-    public PizzaDTO update(Integer integer, PizzaDTO pizzaDTO) {
+    public PizzaDTO update(Integer integer, PizzaDTO pizzaDTO) throws ApiException {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Pizza p = em.find(Pizza.class, integer);
@@ -74,11 +80,13 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
             Pizza mergedPizza = em.merge(p);
             em.getTransaction().commit();
             return mergedPizza != null ? new PizzaDTO(mergedPizza) : null;
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizza not found");
         }
     }
 
     @Override
-    public void delete(Integer integer) {
+    public void delete(Integer integer) throws ApiException {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Pizza pizza = em.find(Pizza.class, integer);
@@ -86,6 +94,8 @@ public class PizzaDAO implements IDAO<PizzaDTO, Integer> {
                 em.remove(pizza);
             }
             em.getTransaction().commit();
+        } catch (Exception e) {
+            throw new ApiException(404, "Pizza not found");
         }
     }
 

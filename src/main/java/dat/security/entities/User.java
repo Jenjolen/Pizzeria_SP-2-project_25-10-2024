@@ -1,6 +1,6 @@
 package dat.security.entities;
 
-import dk.bugelhartmann.UserDTO;
+import dat.entities.Order;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -31,26 +31,21 @@ public class User implements Serializable, ISecurityUser {
     @Basic(optional = false)
     @Column(name = "username", length = 25)
     private String username;
-
     @Basic(optional = false)
     @Column(name = "password")
     private String password;
 
-    @Basic(optional = false)
-    @Column(name = "age")
-    private Integer age; // Nytt felt til alder
-
-    @Basic(optional = false)
-    @Column(name = "gender")
-    private String gender; // Nytt felt til køn
-
-    @Basic(optional = false)
-    @Column(name = "email", unique = true)
-    private String email; // Nytt felt til e-mail
+    // Extra fields for the user
+    private int age;
+    private String email;
+    private String gender;
 
     @JoinTable(name = "user_roles", joinColumns = {@JoinColumn(name = "user_name", referencedColumnName = "username")}, inverseJoinColumns = {@JoinColumn(name = "role_name", referencedColumnName = "name")})
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    private Set<Order> orders = new HashSet<>();
 
     public Set<String> getRolesAsStrings() {
         if (roles.isEmpty()) {
@@ -77,11 +72,6 @@ public class User implements Serializable, ISecurityUser {
         this.roles = roleEntityList;
     }
 
-    public User(UserDTO userDTO) {
-        this.username = userDTO.getUsername();
-        this.password = BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt());
-    }
-
     public void addRole(Role role) {
         if (role == null) {
             return;
@@ -92,23 +82,12 @@ public class User implements Serializable, ISecurityUser {
 
     public void removeRole(String userRole) {
         roles.stream()
-                .filter(role -> role.getRoleName().equals(userRole))
-                .findFirst()
-                .ifPresent(role -> {
-                    roles.remove(role);
-                    role.getUsers().remove(this);
-                });
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", age=" + age +
-                ", gender='" + gender + '\'' +
-                ", email='" + email + '\'' +
-                ", roles=" + roles +
-                '}';
+             .filter(role -> role.getRoleName().equals(userRole))
+             .findFirst()
+             .ifPresent(role -> {
+                 roles.remove(role);
+                 role.getUsers().remove(this);
+             });
     }
 }
+

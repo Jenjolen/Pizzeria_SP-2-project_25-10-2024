@@ -75,7 +75,7 @@ public class OrderLineDAOTest {
         OrderDAO orderDAO = OrderDAO.getInstance(emf);
         for (OrderDTO o : OrderDAO.getInstance(emf).readAll()) {
             if (o.equals(new OrderDTO(order))) {
-                orderDAO.update(o.getId(), new OrderDTO(order));
+                orderDAO.update(o.getOrderId(), new OrderDTO(order));
             }
 
         }
@@ -113,7 +113,7 @@ public class OrderLineDAOTest {
         OrderLine orderLine = new OrderLine(createdOrderLine);
 
 
-        OrderLine dbOrderLine = em.find(OrderLine.class, createdOrderLine.getId());
+        OrderLine dbOrderLine = em.find(OrderLine.class, createdOrderLine.getOrderLineId());
         assertEquals(dbOrderLine, orderLine);
         Order dbOrder = em.find(Order.class, orderLine.getOrder().getId());
         for (OrderLine o : dbOrder.getOrderLines()) {
@@ -128,12 +128,12 @@ public class OrderLineDAOTest {
     @Test
     public void testReadOrderLine() throws JsonProcessingException {
 
-        OrderLineDTO o = orderLineDAO.read(1);
-        assertEquals(1, o.getId());
-        assertEquals(1, o.getOrder().getId());
-        assertEquals("Pepperoni", o.getPizza().getName());
-        assertEquals(1, o.getQuantity());
-        assertEquals(10.99, o.getPrice());
+        OrderLineDTO ol = orderLineDAO.read(1);
+        assertEquals(1, ol.getOrderLineId());
+        assertEquals(1, ol.getOrder().getId());
+        assertEquals("Pepperoni", ol.getPizza().getName());
+        assertEquals(1, ol.getQuantity());
+        assertEquals(10.99, ol.getPrice());
 
 
     }
@@ -161,7 +161,7 @@ public class OrderLineDAOTest {
         OrderLineDTO createdOrderLine = orderLineDAO.create(orderLineDTO);
         createdOrderLine.setQuantity(3);
         createdOrderLine.setPrice(180.0);
-        OrderLineDTO updatedOrderLine = orderLineDAO.update(createdOrderLine.getId(), createdOrderLine);
+        OrderLineDTO updatedOrderLine = orderLineDAO.update(createdOrderLine.getOrderLineId(), createdOrderLine);
 
         assertEquals(3, updatedOrderLine.getQuantity());
         assertEquals(180.0, updatedOrderLine.getPrice());
@@ -174,7 +174,7 @@ public class OrderLineDAOTest {
     public void testDeleteOrderLine() {
         OrderLineDTO orderLineDTO = orderLineDAO.read(1);
         assertNotNull(orderLineDTO);
-        orderLineDAO.delete(orderLineDTO.getId());
-        assertNull(orderLineDAO.read(orderLineDTO.getId()));
+        orderLineDAO.delete(orderLineDTO.getOrderLineId());
+        assertNull(orderLineDAO.read(orderLineDTO.getOrderLineId()));
     }
 }

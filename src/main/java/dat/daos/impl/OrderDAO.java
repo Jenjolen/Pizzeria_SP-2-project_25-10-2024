@@ -4,6 +4,7 @@ import dat.dtos.OrderDTO;
 import dat.dtos.OrderLineDTO;
 import dat.entities.Order;
 import dat.entities.OrderLine;
+import dat.exceptions.ApiException;
 import dat.security.entities.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -39,11 +40,13 @@ public class OrderDAO {
         return new OrderDTO(order);
     }
 
-    public OrderDTO read(int id) {
-        EntityManager em = emf.createEntityManager();
-        Order order = em.find(Order.class, id);
-        em.close();
-        return order != null ? new OrderDTO(order) : null; // Returner OrderDTO
+    public OrderDTO read(int id) throws ApiException {
+        try (EntityManager em = emf.createEntityManager()) {
+            Order order = em.find(Order.class, id);
+            return order != null ? new OrderDTO(order) : null; // Returner OrderDTO
+        } catch (Exception e) {
+            throw new ApiException(404, "Order not found");
+        }
     }
 
     public List<OrderDTO> readAll() {
@@ -71,6 +74,9 @@ public class OrderDAO {
         }
         em.getTransaction().commit();
         em.close();
+        if (order == null) {
+            return null;
+        }
         return new OrderDTO(order);}
 
     public void delete(int id) {
@@ -78,6 +84,11 @@ public class OrderDAO {
         em.getTransaction().begin();
         Order order = em.find(Order.class, id);
         if (order != null) {
+            if (order.getOrderLines() != null) {
+                for (OrderLine orderLine : order.getOrderLines()) {
+                    em.remove(orderLine); // Slet orderLine
+                }
+            }
             em.remove(order); // Slet order
         }
         em.getTransaction().commit();

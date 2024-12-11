@@ -17,7 +17,7 @@ import java.util.Objects;
 @JsonIgnoreProperties
 public class OrderLineDTO {
 
-    private Integer id;
+    private Integer orderLineId;
     private Order order;
     private Pizza pizza;
     private Integer quantity;
@@ -31,7 +31,7 @@ public class OrderLineDTO {
     }
 
     public OrderLineDTO(OrderLine orderLine) {
-        this.id = orderLine.getId();
+        this.orderLineId = orderLine.getId();
         this.order = orderLine.getOrder();
         this.pizza = orderLine.getPizza();
         this.quantity = orderLine.getQuantity();

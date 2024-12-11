@@ -40,7 +40,7 @@ public class Pizza {
     @Column(name = "price", nullable = false)
     private Double price;
 
-    @OneToMany(mappedBy = "pizza", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "pizza", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private Set<OrderLine> orderLines = new HashSet<>();
 
     @Setter
@@ -63,7 +63,7 @@ public class Pizza {
 
     public Pizza (PizzaDTO pizzaDTO) {
 
-        this.id = pizzaDTO.getId();
+        this.id = pizzaDTO.getPizzaId();
         this.name = pizzaDTO.getName();
         this.description = pizzaDTO.getDescription();
         this.toppings = pizzaDTO.getToppings();
