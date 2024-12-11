@@ -4,6 +4,7 @@ import dat.config.HibernateConfig;
 import dat.config.Populate;
 import dat.dtos.PizzaDTO;
 import dat.entities.Pizza;
+import dat.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,7 +39,7 @@ class PizzaDAOTest {
 
     @Test
     @DisplayName("Find pizza by ID")
-    void findById() {
+    void findById() throws ApiException {
         // Create a new PizzaDTO and persist it
         PizzaDTO pizzaDTO = new PizzaDTO("Pizza 6", "Description 5", "Pepperoni", 50.0, Pizza.PizzaType.REGULAR);
         PizzaDTO createdPizza = dao.create(pizzaDTO);
@@ -55,7 +56,7 @@ class PizzaDAOTest {
 
     @Test
     @DisplayName("Create pizza")
-    void create() {
+    void create() throws ApiException {
 
         PizzaDTO pizzaDTO = new PizzaDTO("Pizza 4", "Description 4", "Cheese", 40.0, Pizza.PizzaType.REGULAR);
         PizzaDTO actual = dao.create(pizzaDTO);
@@ -65,7 +66,7 @@ class PizzaDAOTest {
 
     @Test
     @DisplayName("Update pizza")
-    void update() {
+    void update() throws ApiException {
         // Create a new PizzaDTO and persist it
         PizzaDTO pizzaDTO = new PizzaDTO("Pizza 4", "Description 4", "Cheese", 40.0, Pizza.PizzaType.FAMILY);
         PizzaDTO createdPizza = dao.create(pizzaDTO);
@@ -86,7 +87,7 @@ class PizzaDAOTest {
 
     @Test
     @DisplayName("Delete pizza")
-    void delete() {
+    void delete() throws ApiException {
         // Create a new PizzaDTO and persist it
         PizzaDTO pizzaDTO = new PizzaDTO("Pizza 4", "Description 4", "Cheese", 40.0, Pizza.PizzaType.REGULAR);
         PizzaDTO createdPizza = dao.create(pizzaDTO);
@@ -109,7 +110,7 @@ class PizzaDAOTest {
 
     @Test
     @DisplayName("Read all pizzas, from all Tests")
-    void readAll() {
+    void readAll() throws ApiException {
         assertEquals(6, dao.readAll().size());
     }
 
