@@ -104,15 +104,15 @@ public class OrderController implements IController<OrderDTO, Integer> {
         ctx.json(orderLineDTOS, OrderLineDTO.class);
     }
 
-    public void updateOrderLine(Context ctx) throws ApiException {
-        int orderLineId = Integer.parseInt(ctx.pathParam("id"));
-        OrderLineDTO orderLineDTO = orderLineDAO.update(orderLineId, ctx.bodyAsClass(OrderLineDTO.class));
-        int orderId = orderLineDTO.getOrder().getId();
-        OrderDTO orderDTO = dao.read(orderId);
-        dao.update(orderId, orderDTO);
-        ctx.res().setStatus(200);
-        ctx.json(orderDTO, OrderDTO.class);
-    }
+//    public void updateOrderLine(Context ctx) throws ApiException {
+//        int orderLineId = Integer.parseInt(ctx.pathParam("id"));
+//        OrderLineDTO orderLineDTO = orderLineDAO.update(orderLineId, ctx.bodyAsClass(OrderLineDTO.class));
+//        int orderId = orderLineDTO.getOrder().getId();
+//        OrderDTO orderDTO = dao.read(orderId);
+//        dao.update(orderId, orderDTO);
+//        ctx.res().setStatus(200);
+//        ctx.json(orderDTO, OrderDTO.class);
+//    }
 
     public void deleteOrderLine(Context ctx) throws ApiException {
         int orderLineId = Integer.parseInt(ctx.pathParam("id"));

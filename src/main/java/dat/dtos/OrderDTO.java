@@ -42,13 +42,13 @@ public class OrderDTO {
         this.user = user;
 
     }
-
-    public OrderDTO(String orderDate, Double orderPrice, UserDTO user, Set<OrderLineDTO> orderLines) {
-        this.orderDate = orderDate;
-        this.orderPrice = orderPrice;
-        this.user = user;
-        this.orderLines = orderLines;
-    }
+//
+//    public OrderDTO(String orderDate, Double orderPrice, UserDTO user, Set<OrderLineDTO> orderLines) {
+//        this.orderDate = orderDate;
+//        this.orderPrice = orderPrice;
+//        this.user = user;
+//        this.orderLines = orderLines;
+//    }
 
     @Override
     public boolean equals(Object o) {

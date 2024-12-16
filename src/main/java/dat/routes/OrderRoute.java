@@ -25,7 +25,7 @@ public class OrderRoute {
 
             // OrderLine routes
             post("/{id}/orderline", orderController::addOrderLine); // vi laver en ny orderline på en order med et bestemt orderId
-            put("/orderline/{id}", orderController::updateOrderLine); // orderLineId er hvad Id refererer til
+//            put("/orderline/{id}", orderController::updateOrderLine); // orderLineId er hvad Id refererer til
             delete("/orderline/{id}", orderController::deleteOrderLine); // orderLineId er hvad Id refererer til
             get("/orderline/{id}", orderController::readOrderLine); // orderLineId er hvad Id refererer til - vi henter en orderline med et bestemt id
             get("/orderline", orderController::readAllOrderLines); // vi henter alle orderlines uanset order

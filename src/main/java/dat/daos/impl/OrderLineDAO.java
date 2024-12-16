@@ -92,20 +92,20 @@ public class OrderLineDAO {
         return orderLines.stream().map(OrderLineDTO::new).collect(Collectors.toList());
     }
 
-    public OrderLineDTO update(Integer id, OrderLineDTO orderLineDTO) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        OrderLine orderLine = em.find(OrderLine.class, id);
-        if (orderLine != null) {
-            orderLine.setOrder(orderLineDTO.getOrder());
-            orderLine.setPizza(orderLineDTO.getPizza());
-            orderLine.setQuantity(orderLineDTO.getQuantity());
-            orderLine.setPrice(orderLineDTO.getPrice());
-            em.merge(orderLine);
-        }
-        em.getTransaction().commit();
-        em.close();
-        return new OrderLineDTO(orderLine);}
+//    public OrderLineDTO update(Integer id, OrderLineDTO orderLineDTO) {
+//        EntityManager em = emf.createEntityManager();
+//        em.getTransaction().begin();
+//        OrderLine orderLine = em.find(OrderLine.class, id);
+//        if (orderLine != null) {
+//            orderLine.setOrder(orderLineDTO.getOrder());
+//            orderLine.setPizza(orderLineDTO.getPizza());
+//            orderLine.setQuantity(orderLineDTO.getQuantity());
+//            orderLine.setPrice(orderLineDTO.getPrice());
+//            em.merge(orderLine);
+//        }
+//        em.getTransaction().commit();
+//        em.close();
+//        return new OrderLineDTO(orderLine);}
 
     public void delete(int id) {
         EntityManager em = emf.createEntityManager();
